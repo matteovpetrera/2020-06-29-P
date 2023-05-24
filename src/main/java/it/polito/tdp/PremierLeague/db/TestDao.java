@@ -1,20 +1,20 @@
 package it.polito.tdp.PremierLeague.db;
 
+import java.util.List;
+
+import it.polito.tdp.PremierLeague.model.EdgeModel;
+
 public class TestDao {
 
 	public static void main(String[] args) {
-		TestDao testDao = new TestDao();
-		testDao.run();
+		 PremierLeagueDAO dao = new PremierLeagueDAO();
+		
+		 List<EdgeModel> res = dao.listAllEdges(45);
+		for(EdgeModel e: res) {
+			System.out.println(e.toString());
+		}
 	}
 	
-	public void run() {
-		PremierLeagueDAO dao = new PremierLeagueDAO();
-		System.out.println("Players:");
-		System.out.println(dao.listAllPlayers());
-		System.out.println("Actions:");
-		System.out.println(dao.listAllActions());
-		System.out.println("Matches:");
-		System.out.println(dao.listAllMatches());
-	}
+	
 
 }

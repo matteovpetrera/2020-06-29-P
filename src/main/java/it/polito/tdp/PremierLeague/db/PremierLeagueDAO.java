@@ -5,8 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import it.polito.tdp.PremierLeague.model.Action;
+import it.polito.tdp.PremierLeague.model.EdgeModel;
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Player;
 
@@ -89,4 +93,51 @@ public class PremierLeagueDAO {
 		}
 	}
 	
+	public List<EdgeModel> listAllEdges(int min){
+		
+		String sql = "SELECT m1.MatchID as m1, m2.MatchID as m2, count(*) as peso "
+				+ "FROM Matches m1, Matches m2, Actions a1, Actions a2 "
+				+ "WHERE m1.MatchID!=m2.MatchID "
+				+ "AND m1.MatchID = a1.MatchID "
+				+ "AND m2.MatchID = a2.MatchID "
+				+ "AND a1.PlayerID = a2.PlayerID "
+				+ "AND a1.TimePlayed>? "
+				+ "AND a2.TimePlayed>? "
+				+ "GROUP BY m1, m2 "
+				+ "HAVING m1>m2";
+		
+		Map<Integer, Match> idMap = getIdMap();
+		List<EdgeModel> result = new ArrayList<EdgeModel>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, min);
+			st.setInt(2, min);
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+
+				EdgeModel e = new EdgeModel(idMap.get(res.getInt("m1")), idMap.get(res.getInt("m2")), res.getInt("peso"));
+				
+				result.add(e);
+
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	} 
+	public Map<Integer, Match> getIdMap(){
+		
+		List<Match> list = listAllMatches();
+		Map<Integer, Match> idMap = new HashMap<>();
+		for(Match m: list) {
+			idMap.put(m.getMatchID(), m);
+		}
+		return idMap;
+	}
 }
